@@ -1,5 +1,5 @@
 var data = {
-  results: []
+  results: [{username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'}]
 };
 
 var requestHandler = function(request, response) {
@@ -11,7 +11,7 @@ var requestHandler = function(request, response) {
 
   headers['Content-Type'] = 'JSON';
 
-  if ( request.url !== '/classes/messages/') {
+  if ( request.url !== '/classes/messages') {
     response.writeHead(404, headers);
     response.end('This page does not exit');
   }
