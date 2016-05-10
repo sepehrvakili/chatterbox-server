@@ -1,6 +1,41 @@
+var fs = require('fs');
+var dataPath = __dirname + '/data.txt';
+
+console.log('dirname is=>>>>', __dirname);
+
+
 var data = {
-  results: [{username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'}]
+  results: [
+    {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'},
+    {username: 'Tim', message: 'Do my bidding!', roomname: 'Lobby'}
+  ]
 };
+
+// writeData
+var stringed = JSON.stringify(data.results);
+console.log(stringed);
+stringed = stringed.slice(1, stringed.length - 1);
+
+console.log(stringed);
+// fs.writeFileSync(dataPath, JSON.stringify(data.results));
+// fs.appendFileSync(dataPath, JSON.stringify(data.results));
+// fs.appendFileSync(dataPath, JSON.stringify(data.results));
+// readData
+
+var readData = [];
+fs.readFile(dataPath, 'utf8', (error, data) => {
+  // at this point data has already been read...
+  var allData = JSON.parse(data);
+  for ( var i = allData.length - 1; i > allData.length - 15 && i > -1; i-- ) {
+    readData.push(allData[i]);
+  }
+});
+setTimeout(() => { console.log('====>> readData content is:=====> ', readData); }, 2000);
+
+// var readBuffer = ;
+
+// 
+
 
 var requestHandler = function(request, response) {
 
@@ -23,6 +58,7 @@ var requestHandler = function(request, response) {
 
   if ( request.method === 'GET' ) {
     response.writeHead(200, headers);
+    // data.results.reverse();
     response.end(JSON.stringify(data));
   }
 
