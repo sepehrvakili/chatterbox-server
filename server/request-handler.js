@@ -11,31 +11,47 @@ var data = {
   ]
 };
 
-// writeData
-var stringed = JSON.stringify(data.results);
-console.log(stringed);
-stringed = stringed.slice(1, stringed.length - 1);
+var stringifity = function(array) { 
+// this func takes in an array of objects and returns
+// a stringified json object without the starting
+// or ending [ brackets ]
+  var stringed = JSON.stringify(array);
+  return stringed.slice(1, stringed.length - 1);
+};
 
-console.log(stringed);
-// fs.writeFileSync(dataPath, JSON.stringify(data.results));
-// fs.appendFileSync(dataPath, JSON.stringify(data.results));
-// fs.appendFileSync(dataPath, JSON.stringify(data.results));
-// readData
 
-var readData = [];
-fs.readFile(dataPath, 'utf8', (error, data) => {
-  // at this point data has already been read...
-  var allData = JSON.parse(data);
-  for ( var i = allData.length - 1; i > allData.length - 15 && i > -1; i-- ) {
-    readData.push(allData[i]);
-  }
-});
-setTimeout(() => { console.log('====>> readData content is:=====> ', readData); }, 2000);
+var writeBuffer = [
+  {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'},
+  {username: 'Tim', message: 'Do my bidding!', roomname: 'Lobby'}
+];
+var readBuffer = [];
 
-// var readBuffer = ;
+var writeToFile = function() {
+  if ( writeBuffer.length > 0 ) {
+    fs.appendFileSync(dataPath, ( stringifity(writeBuffer) + ',') );
+    writeBuffer = [];
+  } 
+};
 
-// 
+var readFromFile = function(numOfMessages) {
+  fs.readFile(dataPath, 'utf8', (error, data) => {
+    // at this point data has already been read...
+    // set readBuffer to empty since we want 
+    readBuffer = [];
+    // remove the trailing comma so JSONstringify will accept input
+    data = data.slice(0, data.length - 1);
+    var allData = JSON.parse('[' + data + ']');
+    for ( var i = allData.length - 1; i > allData.length - numOfMessages && i > -1; i-- ) {
+      readBuffer.push(allData[i]);
+    }
+  }); 
+};
 
+setInterval(() => { console.log('====>> readBuffer content is:=====> ', readBuffer); }, 2000);
+setInterval(() => {
+  writeToFile();
+  readFromFile(15);
+}, 500);
 
 var requestHandler = function(request, response) {
 
@@ -59,7 +75,7 @@ var requestHandler = function(request, response) {
   if ( request.method === 'GET' ) {
     response.writeHead(200, headers);
     // data.results.reverse();
-    response.end(JSON.stringify(data));
+    response.end(JSON.stringify(readBuffer));
   }
 
   if ( request.method === 'POST' ) {
@@ -72,7 +88,7 @@ var requestHandler = function(request, response) {
     request.on('end', function () {
       var post = JSON.parse(body);
       response.writeHead(201, headers);
-      data.results.push(post);
+      writeBuffer.push(post);
       response.end(JSON.stringify(post));
     });
   }
@@ -141,3 +157,18 @@ this file and include it in basic-server.js so that it actually works.
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
+
+// // append Data
+// // Update File with data in the Write Buffer 
+// fs.appendFileSync(dataPath, ( stringifity(writeBuffer) + ',') );
+
+// var readBuffer = [];
+// fs.readFile(dataPath, 'utf8', (error, data) => {
+//   // at this point data has already been read...
+//   // remove the trailing comma so JSONstringify will accept input
+//   data = data.slice(0, data.length - 1);
+//   var allData = JSON.parse('[' + data + ']');
+//   for ( var i = allData.length - 1; i > allData.length - 15 && i > -1; i-- ) {
+//     readBuffer.push(allData[i]);
+//   }
+// });
