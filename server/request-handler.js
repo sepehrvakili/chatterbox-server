@@ -3,14 +3,6 @@ var dataPath = __dirname + '/data.txt';
 
 console.log('dirname is=>>>>', __dirname);
 
-
-var data = {
-  results: [
-    {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'},
-    {username: 'Tim', message: 'Do my bidding!', roomname: 'Lobby'}
-  ]
-};
-
 var stringifity = function(array) { 
 // this func takes in an array of objects and returns
 // a stringified json object without the starting
@@ -19,10 +11,8 @@ var stringifity = function(array) {
   return stringed.slice(1, stringed.length - 1);
 };
 
-
 var writeBuffer = [
-  {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'},
-  {username: 'Tim', message: 'Do my bidding!', roomname: 'Lobby'}
+  {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'}
 ];
 var readBuffer = [];
 
@@ -47,7 +37,7 @@ var readFromFile = function(numOfMessages) {
   }); 
 };
 
-setInterval(() => { console.log('====>> readBuffer content is:=====> ', readBuffer); }, 2000);
+// setInterval(() => { console.log('====>> readBuffer content is:=====> ', readBuffer); }, 2000);
 setInterval(() => {
   writeToFile();
   readFromFile(15);
@@ -74,8 +64,7 @@ var requestHandler = function(request, response) {
 
   if ( request.method === 'GET' ) {
     response.writeHead(200, headers);
-    // data.results.reverse();
-    response.end(JSON.stringify(readBuffer));
+    response.end(JSON.stringify({results: readBuffer}));
   }
 
   if ( request.method === 'POST' ) {
