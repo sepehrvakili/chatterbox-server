@@ -12,6 +12,10 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var data = {
+  results: []
+};
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -27,23 +31,66 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  // The outgoing status.
-  var statusCode = 200;
-
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  // .writeHead() writes to the request line and headers of the response,
+  // which includes the status and all headers.
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
 
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+
+  // See the note below about CORS headers.
+  var headers = defaultCorsHeaders;
+
+  headers['Content-Type'] = 'JSON';
+
+  if ( request.url !== '/classes/messages') {
+    response.writeHead(404, headers);
+    response.end('This page does not exit');
+  }
+
+  if ( request.method === 'OPTIONS' ) {
+    response.writeHead(200, headers);
+    response.end();
+  }
+
+  if ( request.method === 'GET' ) {
+    response.writeHead(200, headers);
+    response.end(JSON.stringify(data));
+  }
+
+  if ( request.method === 'POST' ) {
+    var body = '';
+
+    request.on('data', function (data) {
+      body += data;
+    });
+
+    request.on('end', function () {
+      var post = JSON.parse(body);
+      var postExists = false;
+      for (var i = 0; i < data.results.length; i++) {
+        if ((post.username === data.results[i].username) && (post.message === data.results[i].message)) {
+          postExists = true;
+          break;
+        }
+      }
+
+      if (postExists) {
+        response.writeHead(201, headers);
+        response.end(JSON.stringify(post));
+      } else {
+        response.writeHead(201, headers);
+        data.results.push(post);
+        response.end();
+      }
+
+    // end of request.on('end',...)
+    });
+  }
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,7 +99,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
@@ -71,3 +118,4 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+exports.requestHandler = requestHandler;
