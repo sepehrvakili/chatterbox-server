@@ -10,16 +10,7 @@ var stringifity = function(array) {
   return stringed.slice(1, stringed.length - 1);
 };
 
-// process.chdir('../');
-// console.log(process.cwd());
-// console.log('DIRNAME IS =====>>>>', __dirname);
-// var dirname = __dirname.slice();
-// var html = fs.readFileSync();
-
-
-var writeBuffer = [
-  {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'}
-];
+var writeBuffer = [];
 var readBuffer = [];
 
 var writeToFile = function() {
@@ -43,7 +34,6 @@ var readFromFile = function(numOfMessages) {
   }); 
 };
 
-// setInterval(() => { console.log('====>> readBuffer content is:=====> ', readBuffer); }, 2000);
 setInterval(() => {
   writeToFile();
   readFromFile(15);
@@ -76,6 +66,9 @@ var requestHandler = function(request, response) {
     case '.gif':
       contentType = {'Content-Type': 'image/gif'};
       break;
+    case '.png':
+      contentType = {'Content-Type': 'image/png'};
+      break;
     }
     response.writeHead(200, contentType);
     response.end(file);
@@ -85,7 +78,7 @@ var requestHandler = function(request, response) {
     serveStatic('index.html');
   }
 
-  if ( request.url.includes('css') || request.url.includes('js') || request.url.includes('gif') || request.url.includes('html') ) {
+  if ( request.url.includes('css') || request.url.includes('js') || request.url.includes('gif') || request.url.includes('png') || request.url.includes('html') ) {
     serveStatic(request.url);
   }
 
