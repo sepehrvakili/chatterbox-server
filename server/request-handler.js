@@ -1,7 +1,6 @@
 var fs = require('fs');
 var dataPath = __dirname + '/data.txt';
-
-console.log('dirname is=>>>>', __dirname);
+var pathModule = require('path');
 
 var stringifity = function(array) { 
 // this func takes in an array of objects and returns
@@ -10,6 +9,13 @@ var stringifity = function(array) {
   var stringed = JSON.stringify(array);
   return stringed.slice(1, stringed.length - 1);
 };
+
+// process.chdir('../');
+// console.log(process.cwd());
+// console.log('DIRNAME IS =====>>>>', __dirname);
+// var dirname = __dirname.slice();
+// var html = fs.readFileSync();
+
 
 var writeBuffer = [
   {username: 'Jono', message: 'Do my bidding!', roomname: 'Lobby'}
@@ -52,7 +58,38 @@ var requestHandler = function(request, response) {
 
   headers['Content-Type'] = 'JSON';
 
-  if ( request.url !== '/classes/messages') {
+  var serveStatic = function(requestUrl) {
+    var path = process.cwd() + '/client/' + requestUrl;
+    var file = fs.readFileSync(path);
+    var contentType = '';
+    var ext = pathModule.extname(path);
+    switch (ext) {
+    case '.html':
+      contentType = {'Content-Type': 'text/html'};
+      break;
+    case '.js':
+      contentType = {'Content-Type': 'text/javascript'};
+      break;
+    case '.css':
+      contentType = {'Content-Type': 'text/css'};
+      break;
+    case '.gif':
+      contentType = {'Content-Type': 'image/gif'};
+      break;
+    }
+    response.writeHead(200, contentType);
+    response.end(file);
+  };
+
+  if ( request.url === '/' || request.url === '' ) {
+    serveStatic('index.html');
+  }
+
+  if ( request.url.includes('css') || request.url.includes('js') || request.url.includes('gif') || request.url.includes('html') ) {
+    serveStatic(request.url);
+  }
+
+  if ( request.url !== '/classes/messages' ) {
     response.writeHead(404, headers);
     response.end('This page does not exit');
   }
